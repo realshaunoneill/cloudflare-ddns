@@ -20,7 +20,7 @@ export const verifyCloudflareToken = async () => {
             method: 'GET',
             headers: defaultHeaders,
         });
-        
+
         if (response.ok) {
             const json = await response.json();
             if (json.result && json.result.status === 'active') {
@@ -33,7 +33,7 @@ export const verifyCloudflareToken = async () => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
@@ -47,7 +47,7 @@ export const getPublicIpAddress = async () => {
         const response = await fetch('https://api.ipify.org?format=json', {
             method: 'GET',
         });
-        
+
         if (response.ok) {
             const json = await response.json();
             return json;
@@ -57,7 +57,7 @@ export const getPublicIpAddress = async () => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
@@ -81,7 +81,7 @@ export const getCloudflareZones = async () => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
@@ -104,7 +104,7 @@ export const getCloudflareZoneRecords = async (zoneId) => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
@@ -132,7 +132,7 @@ export const updateCloudflareZoneRecord = async (zoneId, recordId, data) => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
@@ -159,7 +159,7 @@ export const createCloudflareZoneRecord = async (zoneId, data) => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
@@ -169,7 +169,7 @@ export const createCloudflareZoneRecord = async (zoneId, data) => {
 
 export const sendWebhookRequest = async (data) => {
     if (!WEBHOOK_URL || !WEBHOOK_METHOD) return;
-    
+
     try {
         const response = await fetch(WEBHOOK_URL, {
             method: WEBHOOK_METHOD,
@@ -187,7 +187,7 @@ export const sendWebhookRequest = async (data) => {
         if (response.status === 429) {
             throw new Error('Too many requests');
         }
-        
+
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
