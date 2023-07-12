@@ -59,6 +59,7 @@ There are two ways to run this service: using Docker or Node.js. The Docker imag
    npm install
    ```
 3. Copy the .env.example file to .env and modify the values to your liking. See Configuration for more information.
+The .env file is used to store your Cloudflare API key and other configuration options. It is ignored by Git, so you don't have to worry about accidentally committing your API key to the repository. You can copy the .env.example file to .env using the following command:
 
    ```shell
    cp .env.example .env
@@ -76,14 +77,14 @@ There are two ways to run this service: using Docker or Node.js. The Docker imag
    ```
 
 ## Configuration :wrench:
-You can modify the following settings in the config.json file:
+You can modify the following configuration settings in the .env file:
 
-CLOUDFLARE_API_KEY: Your Cloudflare API key or access token.
-DNS_URL: The subdomain to update with the current IP address (can be a wildcard).
-PROXIED: Whether or not to proxy the DNS record through Cloudflare.
-CRON_SCHEDULE: The interval at which to check for IP address changes (using cron syntax).
-WEBHOOK_URL: The URL to send a webhook to when the IP address changes.
-WEBHOOK_METHOD: The HTTP method to use when sending the webhook (GET or POST).
+- CLOUDFLARE_API_KEY: Your Cloudflare API key or access token.
+- DNS_URL: The subdomain to update with the current IP address (can be a wildcard).
+- PROXIED: Whether or not to proxy the DNS record through Cloudflare.
+- CRON_SCHEDULE: The interval at which to check for IP address changes (using cron syntax).
+- WEBHOOK_URL: The URL to send a webhook to when the IP address changes.
+- WEBHOOK_METHOD: The HTTP method to use when sending the webhook (GET or POST).
 
 ## Contributing :handshake:
 Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
