@@ -1,0 +1,14 @@
+version: '3'
+services:
+  log-tailer:
+    container_name: cloudflare-ddns
+    build:
+      dockerfile: Dockerfile
+    environment:
+      - CLOUDFLARE_API_KEY=
+      - DNS_URL=
+      - CRON_SCHEDULE=
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - disableLogging=true
