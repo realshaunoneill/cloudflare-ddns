@@ -27,7 +27,7 @@ const start = async () => {
         const isCloudflareTokenValid = await verifyCloudflareToken();
         if (!isCloudflareTokenValid) {
             console.log('Cloudflare API key is invalid. Exiting', isCloudflareTokenValid);
-            throw new Error('Stopping job.')
+            throw new Error('Cloudflare API key is invalid');
         }
 
         // Find out the TLD of the DNS_URL
@@ -51,7 +51,7 @@ const start = async () => {
         if (!zone) {
             sendWebhookRequest({ status: 'error', message: `Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.` });
             console.log(`Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.`);
-            throw new Error('Stopping job.')
+            throw new Error('Unable to find zone for ${PARSED_TLD}')
         }
         console.log(`Successfully Found Zone: ${zone.name} (${zone.id})`);
 
@@ -106,7 +106,7 @@ const start = async () => {
 
         console.log('Completed, waiting for next scheduled run...\n');
     } catch (error) {
-        console.error('An uncaught error occurred while running. The job will be stopped.', error);
+        console.error('An error occurred while running. The job will be stopped.', error);
         sendWebhookRequest({ status: 'error', message: 'An uncaught error occurred while running. The job will be stopped.', error });
         job.stop();
     }
