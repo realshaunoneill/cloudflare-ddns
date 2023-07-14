@@ -42,7 +42,7 @@ const start = async () => {
             if (!publicIpAddress) {
                 console.log('Unable to get public IP address.', publicIpAddress);
             }
-            console.log(`Public IP Address: ${publicIpAddress.ip}`);
+            console.log(`Public IP Address: ${publicIpAddress}`);
         }
 
         // Get the zones from Cloudflare and find the zone ID for the DNS_URL
@@ -68,23 +68,23 @@ const start = async () => {
             console.log(`DNS record already exists for ${DNS_URL}, checking if it needs to be updated...`);
 
             // Check if the DNS record needs to be updated
-            if (dnsRecord.content === publicIpAddress.ip && dnsRecord.proxied === PROXIED) {
+            if (dnsRecord.content === publicIpAddress && dnsRecord.proxied === PROXIED) {
                 console.log(`DNS record for ${DNS_URL} is already up to date. No action required.`);
                 sendWebhookRequest({ status: 'success', message: `DNS record for ${DNS_URL} is already up to date. No action required.` });
             } else {
-                if (dnsRecord.content !== publicIpAddress.ip) {
-                    console.log(`DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress.ip}`);
+                if (dnsRecord.content !== publicIpAddress) {
+                    console.log(`DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}`);
                 }
                 if (dnsRecord.proxied !== PROXIED) {
                     console.log(`DNS record for ${DNS_URL} needs to be updated. Proxied: ${dnsRecord.proxied} -> ${PROXIED}`);
                 }
-                sendWebhookRequest({ status: 'progress', message: `DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress.ip}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}` });
+                sendWebhookRequest({ status: 'progress', message: `DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}` });
 
                 // Update the DNS record
                 const updatedDnsRecord = await updateCloudflareZoneRecord(zone.id, dnsRecord.id, {
                     type: dnsRecord.type,
                     name: dnsRecord.name,
-                    content: publicIpAddress.ip,
+                    content: publicIpAddress,
                     proxied: PROXIED,
                 });
 
@@ -96,7 +96,7 @@ const start = async () => {
             const newRecord = await createCloudflareZoneRecord(zone.id, {
                 type: 'A',
                 name: DNS_URL,
-                content: publicIpAddress.ip,
+                content: publicIpAddress,
                 proxied: PROXIED,
             });
 
