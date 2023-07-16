@@ -1,0 +1,27 @@
+{
+  "name": "cloudflare-ddns",
+  "version": "0.0.1",
+  "description": "Auto update a cloudflare DNS record with your public IP",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ./src/index",
+    "dev": "node -r dotenv/config ./src/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-personal:realshaunoneill/cloudflare-ddns.git"
+  },
+  "keywords": [
+    "cloudflare"
+  ],
+  "author": "Shaun O'Neill",
+  "license": "ISC",
+  "dependencies": {
+    "cron": "^2.3.1",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
