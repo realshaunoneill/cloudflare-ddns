@@ -87,6 +87,21 @@ You can modify the following configuration settings in the .env file:
 - WEBHOOK_URL: The URL to send a webhook to when the IP address changes.
 - WEBHOOK_METHOD: The HTTP method to use when sending the webhook (GET or POST).
 
+## How to use cron
+[Cron](https://en.wikipedia.org/wiki/Cron) is used to schedule the script execution.
+You can use [crontab.guru](https://crontab.guru) as helper to get the cron job working.
+```
+# ┌───────────── minute (0 - 59)
+# │ ┌───────────── hour (0 - 23)
+# │ │ ┌───────────── day of the month (1 - 31)
+# │ │ │ ┌───────────── month (1 - 12)
+# │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday 7 is also Sunday on some systems)
+# │ │ │ │ │                               
+# │ │ │ │ │ 
+# │ │ │ │ │ 
+# * * * * * 
+```
+
 ## Contributing :handshake:
 Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
 
