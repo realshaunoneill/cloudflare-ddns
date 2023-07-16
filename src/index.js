@@ -1,4 +1,4 @@
-import {CronJob} from 'cron';
+import { CronJob } from 'cron';
 
 import {
     verifyCloudflareToken,
@@ -19,10 +19,6 @@ const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const WEBHOOK_METHOD = process.env.WEBHOOK_METHOD;
 const IP_OVERRIDE = process.env.IP_OVERRIDE;
 
-// Find out the TLD of the DNS_URL
-const PARSED_TLD = DNS_URL.split('.').slice(-2).join('.');
-console.log(`Parsed TLD: ${PARSED_TLD}`);
-
 let job = null;
 
 const start = async () => {
@@ -33,6 +29,10 @@ const start = async () => {
             console.log('Cloudflare API key is invalid. Exiting', isCloudflareTokenValid);
             throw new Error('Stopping job.')
         }
+
+        // Find out the TLD of the DNS_URL
+        const PARSED_TLD = DNS_URL.split('.').slice(-2).join('.');
+        console.log(`Parsed TLD: ${PARSED_TLD}`);
 
         // Get the public IP address of the machine
         const publicIpAddress = IP_OVERRIDE ? IP_OVERRIDE : await getPublicIpAddress();
@@ -49,7 +49,7 @@ const start = async () => {
         const zones = await getCloudflareZones();
         const zone = zones.result.find((zone) => zone.name === PARSED_TLD);
         if (!zone) {
-            sendWebhookRequest({status: 'error', message: `Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.`});
+            sendWebhookRequest({ status: 'error', message: `Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.` });
             console.log(`Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.`);
             throw new Error('Stopping job.')
         }
@@ -58,10 +58,10 @@ const start = async () => {
         // Get the DNS records for the zone
         const zoneRecords = await getCloudflareZoneRecords(zone.id);
         if (!zoneRecords) {
-            sendWebhookRequest({status: 'error', message: `Unable to get DNS records for ${PARSED_TLD}.`});
+            sendWebhookRequest({ status: 'error', message: `Unable to get DNS records for ${PARSED_TLD}.` });
             console.log(`Unable to get DNS records for ${PARSED_TLD}.`);
         }
-        
+
         // Check if the DNS_URL is already in the zone
         const dnsRecord = zoneRecords.result.find((record) => record.name === DNS_URL);
         if (dnsRecord) {
@@ -70,7 +70,7 @@ const start = async () => {
             // Check if the DNS record needs to be updated
             if (dnsRecord.content === publicIpAddress.ip && dnsRecord.proxied === PROXIED) {
                 console.log(`DNS record for ${DNS_URL} is already up to date. No action required.`);
-                sendWebhookRequest({status: 'success', message: `DNS record for ${DNS_URL} is already up to date. No action required.`});
+                sendWebhookRequest({ status: 'success', message: `DNS record for ${DNS_URL} is already up to date. No action required.` });
             } else {
                 if (dnsRecord.content !== publicIpAddress.ip) {
                     console.log(`DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress.ip}`);
@@ -78,7 +78,7 @@ const start = async () => {
                 if (dnsRecord.proxied !== PROXIED) {
                     console.log(`DNS record for ${DNS_URL} needs to be updated. Proxied: ${dnsRecord.proxied} -> ${PROXIED}`);
                 }
-                sendWebhookRequest({status: 'progress', message: `DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress.ip}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}`});
+                sendWebhookRequest({ status: 'progress', message: `DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress.ip}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}` });
 
                 // Update the DNS record
                 const updatedDnsRecord = await updateCloudflareZoneRecord(zone.id, dnsRecord.id, {
@@ -89,7 +89,7 @@ const start = async () => {
                 });
 
                 console.log(`DNS record for ${DNS_URL} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`);
-                sendWebhookRequest({status: 'success', message: `DNS record for ${DNS_URL} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`});
+                sendWebhookRequest({ status: 'success', message: `DNS record for ${DNS_URL} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}` });
             }
         } else {
             console.log(`DNS record does not exist for ${DNS_URL}, creating it...`);
@@ -101,13 +101,13 @@ const start = async () => {
             });
 
             console.log(`DNS record for ${DNS_URL} has been created. IP Address: ${newRecord.result.content}`);
-            sendWebhookRequest({status: 'progress', message: `DNS record for ${DNS_URL} has been created. IP Address: ${newRecord.result.content}`});
+            sendWebhookRequest({ status: 'progress', message: `DNS record for ${DNS_URL} has been created. IP Address: ${newRecord.result.content}` });
         }
 
         console.log('Completed, waiting for next scheduled run...\n');
     } catch (error) {
         console.error('An uncaught error occurred while running. The job will be stopped.', error);
-        sendWebhookRequest({status: 'error', message: 'An uncaught error occurred while running. The job will be stopped.', error});
+        sendWebhookRequest({ status: 'error', message: 'An uncaught error occurred while running. The job will be stopped.', error });
         job.stop();
     }
 };
@@ -117,7 +117,6 @@ const verifyStartup = () => {
     console.log('Configuration:');
     console.log(`CLOUDFLARE_API_KEY: ${CLOUDFLARE_API_KEY}`);
     console.log(`DNS_URL: ${DNS_URL}`);
-    console.log('PARSED_TLD: ', PARSED_TLD);
     console.log(`CRON_SCHEDULE: ${CRON_SCHEDULE}`);
     console.log(`TIMEZONE: ${TIMEZONE}`);
     if (PROXIED) console.log(`PROXIED: ${PROXIED}`);
@@ -134,10 +133,6 @@ const verifyStartup = () => {
 
     if (!CRON_SCHEDULE) {
         return console.log('CRON_SCHEDULE is required.');
-    }
-
-    if (!PARSED_TLD) {
-        return console.log('Unable to parse TLD from DNS_URL.');
     }
 
     if (!PROXIED) {
@@ -158,7 +153,7 @@ const verifyStartup = () => {
     console.log('Startup configuration is valid, starting the cron job...');
     job = new CronJob(
         CRON_SCHEDULE,
-        function() {
+        function () {
             start();
         },
         null,
