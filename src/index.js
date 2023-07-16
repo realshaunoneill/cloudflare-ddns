@@ -26,7 +26,7 @@ const start = async () => {
         // Verify that the cloudflare API key is valid
         const isCloudflareTokenValid = await verifyCloudflareToken();
         if (!isCloudflareTokenValid) {
-            console.log('Cloudflare API key is invalid. Exiting', isCloudflareTokenValid);
+            console.log('Cloudflare API key is invalid. Exiting. Sent API key: ', CLOUDFLARE_API_KEY);
             throw new Error('Cloudflare API key is invalid');
         }
 
