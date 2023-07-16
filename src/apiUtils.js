@@ -44,13 +44,20 @@ export const verifyCloudflareToken = async () => {
 
 export const getPublicIpAddress = async () => {
     try {
-        const response = await fetch('https://api.ipify.org?format=json', {
-            method: 'GET',
-        });
+        const response = await fetch('https://one.one.one.one/cdn-cgi/trace');
 
         if (response.ok) {
-            const json = await response.json();
-            return json;
+            const data = await response.text();
+            const lines = data.split('\n');
+            let ip_address = null;
+        
+            for (const line of lines) {
+              if (line.startsWith('ip=')) {
+                ip_address = line.split('=')[1];
+                break;
+              }
+            }
+            return ip_address;
         }
 
         // Check if the response code is 429 (too many requests)

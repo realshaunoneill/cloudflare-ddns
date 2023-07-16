@@ -12,6 +12,7 @@ A Node.js-based Dynamic DNS (DDNS) service using Cloudflare as the DNS provider.
 - The Docker image is small and efficient.
 - Wildcard domains (*.example.org) are also supported.
 - Supports all platforms.
+- This service pulls the IP address from the [Cloudflare API](https://one.one.one.one/cdn-cgi/trace) instead of using a third-party service.
 
 ## Prerequisites :clipboard:
 To use this service, you need to have either Node.js or Docker installed on your machine.
