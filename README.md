@@ -106,4 +106,4 @@ You can use [crontab.guru](https://crontab.guru) as helper to get the cron job w
 Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
 
 ## License :page_facing_up:
-This project is licensed under the MIT License.
+This project is licensed under the GPL-3.0 License.
