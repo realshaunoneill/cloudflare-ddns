@@ -106,62 +106,65 @@ const start = async () => {
 
         console.log('Completed, waiting for next scheduled run...\n');
     } catch (error) {
-        console.error('An error occurred while running. The job will be stopped.', error);
+        console.error('An error occurred while running. The job wont be stopped.', error);
         sendWebhookRequest({ status: 'error', message: 'An uncaught error occurred while running. The job will be stopped.', error });
-        job.stop();
     }
 };
 
 const verifyStartup = () => {
-    console.log('Starting Cloudflare DNS Updater...');
-    console.log('Configuration:');
-    console.log(`CLOUDFLARE_API_KEY: ${CLOUDFLARE_API_KEY}`);
-    console.log(`DNS_URL: ${DNS_URL}`);
-    console.log(`CRON_SCHEDULE: ${CRON_SCHEDULE}`);
-    console.log(`TIMEZONE: ${TIMEZONE}`);
-    if (PROXIED) console.log(`PROXIED: ${PROXIED}`);
-    if (IP_OVERRIDE) console.log(`IP_OVERRIDE: ${IP_OVERRIDE}`);
-    console.log(`----------------------------------------`);
+    try {
+        console.log('Starting Cloudflare DNS Updater...');
+        console.log('Configuration:');
+        console.log(`CLOUDFLARE_API_KEY: ${CLOUDFLARE_API_KEY}`);
+        console.log(`DNS_URL: ${DNS_URL}`);
+        console.log(`CRON_SCHEDULE: ${CRON_SCHEDULE}`);
+        console.log(`TIMEZONE: ${TIMEZONE}`);
+        if (PROXIED) console.log(`PROXIED: ${PROXIED}`);
+        if (IP_OVERRIDE) console.log(`IP_OVERRIDE: ${IP_OVERRIDE}`);
+        console.log(`----------------------------------------`);
 
-    if (!CLOUDFLARE_API_KEY) {
-        return console.log('CLOUDFLARE_API_KEY is required.');
-    }
-
-    if (!DNS_URL) {
-        return console.log('DNS_URL is required.');
-    }
-
-    if (!CRON_SCHEDULE) {
-        return console.log('CRON_SCHEDULE is required.');
-    }
-
-    if (!PROXIED) {
-        console.log('PROXIED value is not supplied so defaulting to - false.');
-    }
-
-    if (WEBHOOK_URL || WEBHOOK_METHOD) {
-        if (WEBHOOK_METHOD && WEBHOOK_METHOD) {
-            if (WEBHOOK_METHOD !== 'GET' && WEBHOOK_METHOD !== 'POST') {
-                return console.log('WEBHOOK_METHOD must be either GET or POST.');
-            }
-            console.log(`${WEBHOOK_METHOD} request will be sent to ${WEBHOOK_URL} when the DNS record is updated.`)
-        } else {
-            return console.log('WEBHOOK_URL and WEBHOOK_METHOD are both required.');
+        if (!CLOUDFLARE_API_KEY) {
+            return console.log('CLOUDFLARE_API_KEY is required.');
         }
-    }
 
-    console.log('Startup configuration is valid, starting the cron job...');
-    job = new CronJob(
-        CRON_SCHEDULE,
-        function () {
-            start();
-        },
-        null,
-        true,
-        TIMEZONE,
-        null,
-        true
-    );
+        if (!DNS_URL) {
+            return console.log('DNS_URL is required.');
+        }
+
+        if (!CRON_SCHEDULE) {
+            return console.log('CRON_SCHEDULE is required.');
+        }
+
+        if (!PROXIED) {
+            console.log('PROXIED value is not supplied so defaulting to - false.');
+        }
+
+        if (WEBHOOK_URL || WEBHOOK_METHOD) {
+            if (WEBHOOK_METHOD && WEBHOOK_METHOD) {
+                if (WEBHOOK_METHOD !== 'GET' && WEBHOOK_METHOD !== 'POST') {
+                    return console.log('WEBHOOK_METHOD must be either GET or POST.');
+                }
+                console.log(`${WEBHOOK_METHOD} request will be sent to ${WEBHOOK_URL} when the DNS record is updated.`)
+            } else {
+                return console.log('WEBHOOK_URL and WEBHOOK_METHOD are both required.');
+            }
+        }
+
+        console.log('Startup configuration is valid, starting the cron job...');
+        job = new CronJob(
+            CRON_SCHEDULE,
+            function () {
+                start();
+            },
+            null,
+            true,
+            TIMEZONE,
+            null,
+            true
+        );
+    } catch (error) {
+        console.error('An error occurred while verifying the startup config. Error -', error);
+    }
 };
 
 verifyStartup();
