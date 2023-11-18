@@ -1,6 +1,6 @@
 {
   "name": "cloudflare-ddns",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Auto update a cloudflare DNS record with your public IP",
   "main": "index.js",
   "type": "module",
