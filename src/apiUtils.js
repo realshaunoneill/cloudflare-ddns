@@ -9,6 +9,7 @@ import {
 
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const WEBHOOK_METHOD = process.env.WEBHOOK_METHOD;
+const DEBUG = process.env.DEBUG === 'true' || false;
 
 const defaultHeaders = {
     'Authorization': `Bearer ${process.env.CLOUDFLARE_API_KEY}`,
@@ -21,23 +22,18 @@ export const verifyCloudflareToken = async () => {
             headers: defaultHeaders,
         });
 
-        if (response.ok) {
-            const json = await response.json();
-            if (json.result && json.result.status === 'active') {
-                return true;
-            }
-            return false;
+        if (DEBUG) {
+            console.log('Cloudflare API key verification response:', await response.json());
         }
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
-        // If the response code is not 429, throw an error
-        throw new Error(response.status);
+        return response.ok;
     } catch (error) {
-        console.error(error);
+        console.error('Unable to verify Cloudflare API key', error);
         return false;
     }
 };
@@ -45,6 +41,10 @@ export const verifyCloudflareToken = async () => {
 export const getPublicIpAddress = async () => {
     try {
         const response = await fetch('https://one.one.one.one/cdn-cgi/trace');
+
+        if (DEBUG) {
+            console.log('Public IP address response:', await response.text());
+        }
 
         if (response.ok) {
             const data = await response.text();
@@ -62,13 +62,13 @@ export const getPublicIpAddress = async () => {
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
-        console.error(error);
+        console.error('Unable to get public IP address', error);
     }
 };
 
@@ -79,6 +79,10 @@ export const getCloudflareZones = async () => {
             headers: defaultHeaders,
         });
 
+        if (DEBUG) {
+            console.log('Cloudflare zones response:', await response.json());
+        }
+
         if (response.ok) {
             const json = await response.json();
             return json;
@@ -86,13 +90,13 @@ export const getCloudflareZones = async () => {
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
-        console.error(error);
+        console.error('Unable to get Cloudflare zones', error);
     }
 };
 
@@ -102,6 +106,11 @@ export const getCloudflareZoneRecords = async (zoneId) => {
             method: 'GET',
             headers: defaultHeaders,
         });
+
+        if (DEBUG) {
+            console.log('Cloudflare zone records response:', await response.json());
+        }
+
         if (response.ok) {
             const json = await response.json();
             return json;
@@ -109,13 +118,13 @@ export const getCloudflareZoneRecords = async (zoneId) => {
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
-        console.error(error);
+        console.error('Unable to get Cloudflare zone records', error);
     }
 };
 
@@ -130,6 +139,10 @@ export const updateCloudflareZoneRecord = async (zoneId, recordId, data) => {
             body: JSON.stringify(data),
         });
 
+        if (DEBUG) {
+            console.log('Cloudflare update zone record response:', await response.json(), 'data:', data);
+        }
+
         if (response.ok) {
             const json = await response.json();
             return json;
@@ -137,13 +150,13 @@ export const updateCloudflareZoneRecord = async (zoneId, recordId, data) => {
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
-        console.error(error);
+        console.error('Unable to update Cloudflare zone record', error);
     }
 };
 
@@ -157,6 +170,11 @@ export const createCloudflareZoneRecord = async (zoneId, data) => {
             },
             body: JSON.stringify(data),
         });
+
+        if (DEBUG) {
+            console.log('Cloudflare create zone record response:', await response.json(), 'data:', data);
+        }
+
         if (response.ok) {
             const json = await response.json();
             return json;
@@ -164,13 +182,13 @@ export const createCloudflareZoneRecord = async (zoneId, data) => {
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
-        console.error(error);
+        console.error('Unable to create Cloudflare zone record', error);
     }
 };
 
@@ -186,18 +204,22 @@ export const sendWebhookRequest = async (data) => {
             body: JSON.stringify(data),
         });
 
+        if (DEBUG) {
+            console.log('Webhook response:', await response.json(), 'data:', data);
+        }
+
         if (response.ok) {
             return response.status;
         }
 
         // Check if the response code is 429 (too many requests)
         if (response.status === 429) {
-            throw new Error('Too many requests');
+            throw new Error('Too many requests, error code 429');
         }
 
         // If the response code is not 429, throw an error
         throw new Error(response.status);
     } catch (error) {
-        console.error(error);
+        console.error('Unable to send webhook request', error);
     }
 };
