@@ -18,6 +18,7 @@ const CRON_SCHEDULE = process.env.CRON_SCHEDULE;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const WEBHOOK_METHOD = process.env.WEBHOOK_METHOD;
 const IP_OVERRIDE = process.env.IP_OVERRIDE;
+const DEBUG = process.env.DEBUG || false;
 
 let job = null;
 
@@ -27,7 +28,7 @@ const start = async () => {
         const isCloudflareTokenValid = await verifyCloudflareToken();
         if (!isCloudflareTokenValid) {
             console.log('Cloudflare API key is invalid. Exiting. Sent API key: ', CLOUDFLARE_API_KEY);
-            throw new Error('Cloudflare API key is invalid');
+            job.stop();
         }
 
         // Find out the TLD of the DNS_URL
@@ -121,6 +122,7 @@ const verifyStartup = () => {
         console.log(`TIMEZONE: ${TIMEZONE}`);
         if (PROXIED) console.log(`PROXIED: ${PROXIED}`);
         if (IP_OVERRIDE) console.log(`IP_OVERRIDE: ${IP_OVERRIDE}`);
+        if (DEBUG) console.log(`DEBUG: ${DEBUG}`);
         console.log(`----------------------------------------`);
 
         if (!CLOUDFLARE_API_KEY) {

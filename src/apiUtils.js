@@ -9,7 +9,7 @@ import {
 
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const WEBHOOK_METHOD = process.env.WEBHOOK_METHOD;
-const DEBUG = process.env.DEBUG === 'true' || false;
+const DEBUG = process.env.DEBUG || false;
 
 const defaultHeaders = {
     'Authorization': `Bearer ${process.env.CLOUDFLARE_API_KEY}`,
