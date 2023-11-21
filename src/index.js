@@ -29,6 +29,7 @@ const start = async () => {
         if (!isCloudflareTokenValid) {
             console.log('Cloudflare API key is invalid. Exiting. Sent API key: ', CLOUDFLARE_API_KEY);
             job.stop();
+            return;
         }
 
         // Find out the TLD of the DNS_URL
