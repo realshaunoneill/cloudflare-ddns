@@ -26,4 +26,3 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/cloudflare-ddns:latest
-          platforms: linux/amd64, linux/arm64, linux/arm/v7
