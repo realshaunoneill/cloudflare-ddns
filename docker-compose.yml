@@ -1,10 +1,10 @@
-version: '3.8'
+version: "3.8"
 services:
-  log-tailer:
+  cloudflare-ddns:
+    image: realshaunoneill/cloudflare-ddns:latest
     container_name: cloudflare-ddns
-    build:
-      dockerfile: Dockerfile
+    platform: linux/x86_64
     environment:
       - CLOUDFLARE_API_KEY=
       - DNS_URL=
-      - CRON_SCHEDULE=
+      - CRON_SCHEDULE=0 * * * *
