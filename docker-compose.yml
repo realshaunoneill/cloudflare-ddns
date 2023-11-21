@@ -3,7 +3,6 @@ services:
   cloudflare-ddns:
     image: realshaunoneill/cloudflare-ddns:latest
     container_name: cloudflare-ddns
-    platform: linux/x86_64
     environment:
       - CLOUDFLARE_API_KEY=
       - DNS_URL=

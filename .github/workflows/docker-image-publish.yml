@@ -7,13 +7,9 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [linux, windows, macos]
     steps:
       -
         name: Set up QEMU
-        if: matrix.os == 'linux'
         uses: docker/setup-qemu-action@v2
       -
         name: Set up Docker Buildx
@@ -30,4 +26,4 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/cloudflare-ddns:latest
-          platforms: linux/amd64, linux/arm64, linux/arm/v7, windows/amd64, windows/arm
+          platforms: linux/amd64, linux/arm64, linux/arm/v7
