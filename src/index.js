@@ -22,156 +22,117 @@ const DEBUG = process.env.DEBUG || false;
 
 let job = null;
 
-const getParsedTLD = (dnsUrl) => {
-    return dnsUrl.split('.').slice(-2).join('.');
-}
+const getParsedTLD = (dnsUrl) => dnsUrl.split('.').slice(-2).join('.');
 
-const updateDomain = async (domain) => {
-    try {
-        // Get the zones from Cloudflare and find the zone ID for the DNS_URL
-        const zones = await getCloudflareZones();
-        const zone = zones.result.find((zone) => zone.name === PARSED_TLD);
-        if (!zone) {
-            sendWebhookRequest({ status: 'error', message: `Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.` });
-            console.log(`Unable to find zone for ${PARSED_TLD}. Please ensure that the domain is registered with Cloudflare.`);
-            throw new Error('Unable to find zone for ${PARSED_TLD}')
-        }
-        console.log(`Successfully Found Zone: ${zone.name} (${zone.id})`);
+const updateDomain = async (domain, publicIpAddress) => {
+  try {
+    // Get the zones from Cloudflare and find the zone ID for the DNS_URL
+    const zones = await getCloudflareZones();
+    const zone = zones.result.find((zone) => zone.name === domain);
+
+    if (!zone) {
+      sendWebhookRequest({
+        status: 'error', message: `Unable to find zone for ${domain}. Please ensure that the domain is registered with Cloudflare.`, 
+      });
+      console.log(`Unable to find zone for ${domain}. Please ensure that the domain is registered with Cloudflare.`);
+      throw new Error(`Unable to find zone for ${domain}`);
+    }
+    console.log(`Successfully Found Zone: ${zone.name} (${zone.id})`);
 
     // Get the DNS records for the zone
     const zoneRecords = await getCloudflareZoneRecords(zone.id);
-        // Check if the domain is already in the zone
-        const dnsRecord = zoneRecords.result.find((record) => record.name === domain);
-        if (dnsRecord) {
-            console.log(`DNS record already exists for ${domain}, checking if it needs to be updated...`);
+    // Check if the domain is already in the zone
+    const dnsRecord = zoneRecords.result.find((record) => record.name === domain);
 
-            // Check if the DNS record needs to be updated
-            if (dnsRecord.content === publicIpAddress && dnsRecord.proxied === PROXIED) {
-                console.log(`DNS record for ${domain} is already up to date. No action required.`);
-                sendWebhookRequest({ status: 'success', message: `DNS record for ${domain} is already up to date. No action required.` });
-            } else {
-                if (dnsRecord.content !== publicIpAddress) {
-                    console.log(`DNS record for ${domain} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}`);
-                }
-                if (dnsRecord.proxied !== PROXIED) {
-                    console.log(`DNS record for ${domain} needs to be updated. Proxied: ${dnsRecord.proxied} -> ${PROXIED}`);
-                }
-                sendWebhookRequest({ status: 'progress', message: `DNS record for ${domain} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}` });
+    if (dnsRecord) {
+      console.log(`DNS record already exists for ${domain}, checking if it needs to be updated...`);
 
-                // Update the DNS record
-                const updatedDnsRecord = await updateCloudflareZoneRecord(zone.id, dnsRecord.id, {
-                    type: dnsRecord.type,
-                    name: dnsRecord.name,
-                    content: publicIpAddress,
-                    proxied: PROXIED,
-                });
-
-                console.log(`DNS record for ${domain} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`);
-                sendWebhookRequest({ status: 'success', message: `DNS record for ${domain} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}` });
-            }
-        } else {
-            console.log(`DNS record does not exist for ${domain}, creating it...`);
-            const newRecord = await createCloudflareZoneRecord(zone.id, {
-                type: 'A',
-                name: domain,
-                content: publicIpAddress,
-                proxied: PROXIED,
-            });
-
-            console.log(`DNS record for ${domain} has been created. IP Address: ${newRecord.result.content}`);
-            sendWebhookRequest({ status: 'progress', message: `DNS record for ${domain} has been created. IP Address: ${newRecord.result.content}` });
+      // Check if the DNS record needs to be updated
+      if (dnsRecord.content === publicIpAddress && dnsRecord.proxied === PROXIED) {
+        console.log(`DNS record for ${domain} is already up to date. No action required.`);
+        sendWebhookRequest({
+          status: 'success', message: `DNS record for ${domain} is already up to date. No action required.`, 
+        });
+      } else {
+        if (dnsRecord.content !== publicIpAddress) {
+          console.log(`DNS record for ${domain} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}`);
         }
-    } catch (error) {
-        console.error('An error occurred while updating the domain', error);
-    }
-};
-
-const start = async () => {
-    try {
-        // Verify that the cloudflare API key is valid
-        const isCloudflareTokenValid = await verifyCloudflareToken();
-        if (!isCloudflareTokenValid) {
-            console.log('Cloudflare API key is invalid. Exiting. Sent API key: ', CLOUDFLARE_API_KEY);
-            job.stop();
-            return;
-        }
-
-        // Find out the TLD of the DNS_URL, check for multiple subdomains
-
-        const PARSED_TLDS = DNS_URL.split(',').map((dnsUrl) => getParsedTLD(dnsUrl.trim()));
-        console.log(`Parsed TLDs: ${PARSED_TLDS}`);
-
-        // Get the public IP address of the machine
-        const publicIpAddress = IP_OVERRIDE ? IP_OVERRIDE : await getPublicIpAddress();
-        if (IP_OVERRIDE) {
-            console.log(`IP Override: ${IP_OVERRIDE}, not checking public IP address.`);
-        } else {
-            if (!publicIpAddress) {
-                console.log('Unable to get public IP address.', publicIpAddress);
-            }
-            console.log(`Public IP Address: ${publicIpAddress}`);
-        }
-
-        // If the DNS_URL is a single domain, update the domain
-        for (const PARSED_TLD of PARSED_TLDS) {
-            console.log(`Updating domain: ${PARSED_TLD}`);
-            updateDomain(PARSED_TLD);
+        if (dnsRecord.proxied !== PROXIED) {
+          console.log(`DNS record for ${domain} needs to be updated. Proxied: ${dnsRecord.proxied} -> ${PROXIED}`);
         }
         sendWebhookRequest({
-          status: 'progress',
-          message: `DNS record for ${DNS_URL} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}`,
+          status: 'progress', message: `DNS record for ${domain} needs to be updated. IP Address: ${dnsRecord.content} -> ${publicIpAddress}, Proxied: ${dnsRecord.proxied} -> ${PROXIED}`, 
         });
 
         // Update the DNS record
-        const updatedDnsRecord = await updateCloudflareZoneRecord(
-          zone.id,
-          dnsRecord.id,
-          {
-            type: dnsRecord.type,
-            name: dnsRecord.name,
-            content: publicIpAddress,
-            proxied: PROXIED,
-          },
-        );
+        const updatedDnsRecord = await updateCloudflareZoneRecord(zone.id, dnsRecord.id, {
+          type: dnsRecord.type,
+          name: dnsRecord.name,
+          content: publicIpAddress,
+          proxied: PROXIED,
+        });
 
-        console.log(
-          `DNS record for ${DNS_URL} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`,
-        );
+        console.log(`DNS record for ${domain} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`);
         sendWebhookRequest({
-          status: 'success',
-          message: `DNS record for ${DNS_URL} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`,
+          status: 'success', message: `DNS record for ${domain} has been updated. IP Address: ${updatedDnsRecord.result.content}, Proxied: ${updatedDnsRecord.result.proxied}`, 
         });
       }
     } else {
-      console.log(`DNS record does not exist for ${DNS_URL}, creating it...`);
+      console.log(`DNS record does not exist for ${domain}, creating it...`);
       const newRecord = await createCloudflareZoneRecord(zone.id, {
         type: 'A',
-        name: DNS_URL,
+        name: domain,
         content: publicIpAddress,
         proxied: PROXIED,
       });
 
-      console.log(
-        `DNS record for ${DNS_URL} has been created. IP Address: ${newRecord.result.content}`,
-      );
+      console.log(`DNS record for ${domain} has been created. IP Address: ${newRecord.result.content}`);
       sendWebhookRequest({
-        status: 'progress',
-        message: `DNS record for ${DNS_URL} has been created. IP Address: ${newRecord.result.content}`,
+        status: 'progress', message: `DNS record for ${domain} has been created. IP Address: ${newRecord.result.content}`, 
       });
     }
-
-    console.log('Completed, waiting for next scheduled run...\n');
   } catch (error) {
-    console.error(
-      'An error occurred while running. The job wont be stopped.',
-      error,
-    );
-    sendWebhookRequest({
-      status: 'error',
-      message:
-        'An uncaught error occurred while running. The job will be stopped.',
-      error,
-    });
+    console.error('An error occurred while updating the domain', error);
+  }
+};
+
+const start = async () => {
+  try {
+    // Verify that the cloudflare API key is valid
+    const isCloudflareTokenValid = await verifyCloudflareToken();
+
+    if (!isCloudflareTokenValid) {
+      console.log('Cloudflare API key is invalid. Exiting. Sent API key: ', CLOUDFLARE_API_KEY);
+      job.stop();
+      
+      return;
+    }
+
+    // Find out the TLD of the DNS_URL, check for multiple subdomains
+
+    const PARSED_TLDS = DNS_URL.split(',').map((dnsUrl) => getParsedTLD(dnsUrl.trim()));
+
+    console.log(`Parsed TLDs: ${PARSED_TLDS}`);
+
+    // Get the public IP address of the machine
+    const publicIpAddress = IP_OVERRIDE ? IP_OVERRIDE : await getPublicIpAddress();
+
+    if (IP_OVERRIDE) {
+      console.log(`IP Override: ${IP_OVERRIDE}, not checking public IP address.`);
+    } else {
+      if (!publicIpAddress) {
+        console.log('Unable to get public IP address.', publicIpAddress);
+      }
+      console.log(`Public IP Address: ${publicIpAddress}`);
+    }
+
+    // If the DNS_URL is a single domain, update the domain
+    for (const PARSED_TLD of PARSED_TLDS) {
+      console.log(`Updating domain: ${PARSED_TLD}`);
+      updateDomain(PARSED_TLD, publicIpAddress);
+    }
+  } catch (error) {
+    console.error('An error occurred while updating the domain', error);
   }
 };
 
