@@ -26,9 +26,11 @@ const getParsedTLD = (dnsUrl) => dnsUrl.split('.').slice(-2).join('.');
 
 const updateDomain = async (domain, publicIpAddress) => {
   try {
+    const parsedTLD = getParsedTLD(domain);
+
     // Get the zones from Cloudflare and find the zone ID for the DNS_URL
     const zones = await getCloudflareZones();
-    const zone = zones.result.find((zone) => zone.name === domain);
+    const zone = zones.result.find((zone) => zone.name === parsedTLD);
 
     if (!zone) {
       sendWebhookRequest({
@@ -37,7 +39,7 @@ const updateDomain = async (domain, publicIpAddress) => {
       console.log(`Unable to find zone for ${domain}. Please ensure that the domain is registered with Cloudflare.`);
       throw new Error(`Unable to find zone for ${domain}`);
     }
-    console.log(`Successfully Found Zone: ${zone.name} (${zone.id})`);
+    console.log(`Successfully Found Zone: ${zone.name} (${zone.id}) for ${domain}`);
 
     // Get the DNS records for the zone
     const zoneRecords = await getCloudflareZoneRecords(zone.id);
@@ -91,6 +93,7 @@ const updateDomain = async (domain, publicIpAddress) => {
         status: 'progress', message: `DNS record for ${domain} has been created. IP Address: ${newRecord.result.content}`, 
       });
     }
+    console.log(`Domain ${domain} checks are finished for now.\n\n`);
   } catch (error) {
     console.error('An error occurred while updating the domain', error);
   }
@@ -110,9 +113,9 @@ const start = async () => {
 
     // Find out the TLD of the DNS_URL, check for multiple subdomains
 
-    const PARSED_TLDS = DNS_URL.split(',').map((dnsUrl) => getParsedTLD(dnsUrl.trim()));
+    const DOMAINS = DNS_URL.split(',').map((dnsUrl) => dnsUrl.trim());
 
-    console.log(`Parsed TLDs: ${PARSED_TLDS}`);
+    console.log(`Parsed TLDs: ${DOMAINS}`);
 
     // Get the public IP address of the machine
     const publicIpAddress = IP_OVERRIDE ? IP_OVERRIDE : await getPublicIpAddress();
@@ -121,15 +124,16 @@ const start = async () => {
       console.log(`IP Override: ${IP_OVERRIDE}, not checking public IP address.`);
     } else {
       if (!publicIpAddress) {
-        console.log('Unable to get public IP address.', publicIpAddress);
+        return console.log('Unable to get public IP address. Exiting for now.');
       }
       console.log(`Public IP Address: ${publicIpAddress}`);
     }
 
     // If the DNS_URL is a single domain, update the domain
-    for (const PARSED_TLD of PARSED_TLDS) {
-      console.log(`Updating domain: ${PARSED_TLD}`);
-      updateDomain(PARSED_TLD, publicIpAddress);
+    for (const domain of DOMAINS) {
+      console.log(`Updating domain: ${domain}`);
+      // eslint-disable-next-line no-await-in-loop
+      await updateDomain(domain, publicIpAddress);
     }
   } catch (error) {
     console.error('An error occurred while updating the domain', error);
@@ -160,11 +164,11 @@ const verifyStartup = () => {
     }
 
     if (!DNS_URL) {
-      return console.log('DNS_URL is required.');
+      return console.log('DNS_URL is required. Multiple domains can be separated by a comma.');
     }
 
     if (!CRON_SCHEDULE) {
-      return console.log('CRON_SCHEDULE is required.');
+      return console.log('CRON_SCHEDULE is required. Visit https://crontab.guru/ for help with the schedule.');
     }
 
     if (!PROXIED) {
