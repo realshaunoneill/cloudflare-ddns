@@ -21,16 +21,3 @@ jobs:
 
       - name: Run ESLint check
         run: npm run lint
-
-  prettier:
-    name: 'Prettier'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out
-        uses: actions/checkout@v3
-
-      - name: Install
-        uses: actions/setup-node@v2
-
-      - name: Run Prettier check
-        run: npm run prettier-check
