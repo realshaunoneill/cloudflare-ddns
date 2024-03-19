@@ -12,17 +12,17 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up pnpm
-      uses: pnpm/action-setup@v2
+    - name: Set up yarn
+      uses: actions/setup-yarn@v2
 
     - name: Set up Node
       uses: actions/setup-node@v3
       with:
         node-version: 18
-        cache: pnpm
+        cache: yarn
 
     - name: Install dependencies
       shell: bash
       run: |
         corepack enable
-        pnpm i
+        yarn i
