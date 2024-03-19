@@ -2,33 +2,41 @@
   "name": "cloudflare-ddns",
   "version": "1.0.0",
   "description": "Auto update a cloudflare DNS record with your public IP",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start": "node ./src/index",
-    "dev": "node -r dotenv/config ./src/index"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com-personal:realshaunoneill/cloudflare-ddns.git"
-  },
   "keywords": [
     "cloudflare",
     "ddns",
     "dns",
     "updater"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-personal:realshaunoneill/cloudflare-ddns.git"
+  },
+  "license": "GPL-3.0",
   "author": {
     "name": "Shaun O'Neill",
     "url": "https://www.shaunoneill.com"
   },
-  "license": "GPL-3.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node -r dotenv/config ./src/index",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier-check": "prettier --check .",
+    "prettier-fix": "prettier --write .",
+    "start": "node ./src/index"
+  },
+  "prettier": "@realshaunoneill/style-guide/prettier",
   "dependencies": {
+    "@realshaunoneill/style-guide": "^1.1.0",
     "cron": "3.1.6",
     "node-fetch": "3.3.2"
   },
   "devDependencies": {
     "dotenv": "16.3.1",
-    "eslint-config-prettier": "9.0.0"
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "9.0.0",
+    "prettier": "^3.2.5"
   }
 }
