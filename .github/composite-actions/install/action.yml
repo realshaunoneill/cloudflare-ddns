@@ -22,4 +22,4 @@ runs:
       shell: bash
       run: |
         corepack enable
-        yarn i
+        yarn install --frozen-lockfile --non-interactive
