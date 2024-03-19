@@ -81,7 +81,7 @@ The .env file is used to store your Cloudflare API key and other configuration o
 You can modify the following configuration settings in the .env file:
 
 - CLOUDFLARE_API_KEY: Your Cloudflare API key or access token.
-- DNS_URL: The subdomain to update with the current IP address (can be a wildcard).
+- DNS_URL: The subdomain to update with the current IP address (can be a wildcard, multiples can be separated with commas).
 - PROXIED: Whether or not to proxy the DNS record through Cloudflare.
 - CRON_SCHEDULE: The interval at which to check for IP address changes (using cron syntax).
 - WEBHOOK_URL: The URL to send a webhook to when the IP address changes.
