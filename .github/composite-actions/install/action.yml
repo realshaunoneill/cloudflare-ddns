@@ -12,9 +12,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up yarn
-      uses: actions/setup-yarn@v2
-
     - name: Set up Node
       uses: actions/setup-node@v3
       with:
