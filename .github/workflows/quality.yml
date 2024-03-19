@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/composite-actions/install
 
       - name: Run ESLint check
-        run: pnpm eslint-check
+        run: yarn eslint-check
 
   prettier:
     name: 'Prettier'
@@ -33,4 +33,4 @@ jobs:
         uses: actions/setup-node@v2
 
       - name: Run Prettier check
-        run: pnpm prettier-check
+        run: yarn prettier-check
