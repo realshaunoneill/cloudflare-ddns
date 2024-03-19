@@ -33,4 +33,4 @@ jobs:
         uses: actions/setup-node@v2
 
       - name: Run Prettier check
-        run: npm prettier-check
+        run: npm run prettier-check
